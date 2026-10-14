@@ -1,0 +1,75 @@
+{
+  "version": "v0.1-dev",
+  "notes": "Thresholds are learned on development partition only. Update after develop_thresholds.py runs on real data.",
+  "rule1_large_for_type": {
+    "method": "development 99.5th percentile per transaction_type",
+    "percentile": 0.995,
+    "weight": 40,
+    "thresholds": {
+      "CASH_IN": 183539.9995999992,
+      "CASH_OUT": 767352.3039999984,
+      "DEBIT": 24829.333999999766,
+      "PAYMENT": 50112.001599999996,
+      "TRANSFER": 804649.54125
+    }
+  },
+  "rule2_large_transfer": {
+    "method": "fixed benchmark TRANSFER amount > 200000 (local currency units)",
+    "weight": 30,
+    "amount_threshold": 200000
+  },
+  "rule3_destination_activity": {
+    "method": "end-of-hour recipient activity; compare per (destination_account, simulation_step) counts+values vs dev thresholds",
+    "weight": 30,
+    "thresholds": {
+      "max_count_threshold": 1.0,
+      "max_value_threshold": 555967.794500001
+    },
+    "clarification": "This is end-of-hour monitoring, not instantaneous pre-transaction screening. Same-hour row order is not event time."
+  },
+  "priority_bands": {
+    "high": [
+      70,
+      100
+    ],
+    "medium": [
+      40,
+      69
+    ],
+    "low": [
+      1,
+      39
+    ],
+    "none": 0
+  },
+  "evaluation_partitions": {
+    "development": [
+      1,
+      446
+    ],
+    "validation": [
+      447,
+      594
+    ],
+    "test": [
+      595,
+      744
+    ]
+  },
+  "review_capacity_scenarios": {
+    "A": 100,
+    "B": 250,
+    "C": 500
+  },
+  "leakage_guard": {
+    "forbidden_features": [
+      "is_fraud",
+      "isFlaggedFraud",
+      "oldbalanceOrg",
+      "newbalanceOrig",
+      "oldbalanceDest",
+      "newbalanceDest"
+    ],
+    "notes": "Balances and balance-derived features excluded from screening rules and predictive models per publisher warning (canceled fraudulent txs)."
+  }
+}

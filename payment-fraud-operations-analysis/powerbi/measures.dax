@@ -1,0 +1,18 @@
+// measures.dax — Paste into Power BI. Table assumed: FactMonitoring (from vw_FactMonitoring)
+// Cards Page 1
+Total Transactions = COUNTROWS(FactMonitoring)
+Total Transaction Value = SUM(FactMonitoring[amount])
+Fraud Transactions = CALCULATE([Total Transactions], FactMonitoring[is_fraud]=1)
+Fraud Rate = DIVIDE([Fraud Transactions], [Total Transactions])
+Fraud-Labeled Value = CALCULATE([Total Transaction Value], FactMonitoring[is_fraud]=1)
+Alerted Transactions = CALCULATE([Total Transactions], FactMonitoring[alert_flag]=1)
+True Positives = CALCULATE([Total Transactions], FactMonitoring[alert_flag]=1, FactMonitoring[is_fraud]=1)
+False Positives = CALCULATE([Total Transactions], FactMonitoring[alert_flag]=1, FactMonitoring[is_fraud]=0)
+False Negatives = CALCULATE([Total Transactions], FactMonitoring[alert_flag]=0, FactMonitoring[is_fraud]=1)
+Alert Precision = DIVIDE([True Positives], [Alerted Transactions])
+Fraud Recall = DIVIDE([True Positives], [Fraud Transactions])
+Alert Rate = DIVIDE([Alerted Transactions], [Total Transactions])
+Reviews per Detected Fraud = DIVIDE([Alerted Transactions], [True Positives])
+False Positive Rate = DIVIDE([False Positives], CALCULATE([Total Transactions], FactMonitoring[is_fraud]=0))
+Fraud-Value Recall = DIVIDE(CALCULATE(SUM(FactMonitoring[amount]), FactMonitoring[alert_flag]=1, FactMonitoring[is_fraud]=1), [Fraud-Labeled Value])
+// Use DIVIDE to leave blanks on zero denominators; do not replace with 0.
